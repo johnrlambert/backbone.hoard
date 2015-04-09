@@ -7,6 +7,8 @@ var chai = require('chai');
 var sinonChai = require('sinon-chai');
 var chaiAsPromised = require('chai-as-promised');
 var Backbone = require('backbone');
+var $ = require('jquery');
+Backbone.$ = $;
 var Hoard = require('src/build/backbone.hoard.bundle');
 var asyncLocalStorage = require('./async-local-storage');
 
