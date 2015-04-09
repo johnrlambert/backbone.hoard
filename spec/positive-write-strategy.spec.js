@@ -1,9 +1,11 @@
 'use strict';
 
+var _ = require('underscore');
 var Backbone = require('backbone');
 var Hoard = require('src/backbone.hoard');
 var Store = require('src/store');
 var Policy = require('src/policy');
+var Strategy = require('src/strategy');
 var CreateStrategy = require('src/create-strategy');
 var UpdateStrategy = require('src/update-strategy');
 var PatchStrategy = require('src/patch-strategy');
@@ -30,6 +32,10 @@ describe("Positive write strategies", function () {
       success: this.sinon.stub(),
       error: this.sinon.stub()
     };
+
+    this.sinon.stub(Strategy.prototype, 'decorateOptions', function (model, options) {
+      return options;
+    });
   });
 
   describe("Create", function () {

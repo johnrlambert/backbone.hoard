@@ -22,10 +22,8 @@ _.extend(Strategy.prototype, Hoard.Events, {
   // Take care of all caching/server requesting.
   // This is the main strategy method and entry point from Hoard.Control
   execute: function (model, options) {
-    options.url = this.policy.getUrl(model, this.method, options);
-    options.collection = this.policy.getCollection(model, options);
-    options.model = model;
-    return this.sync(model, options);
+    var hoardOptions = this.decorateOptions(model, options);
+    return this.sync(model, hoardOptions);
   },
 
   // If the model belongs to a collection and that collection is cached,
@@ -153,6 +151,14 @@ _.extend(Strategy.prototype, Hoard.Events, {
     return response;
   },
 
+  decorateOptions: function (model, options) {
+    return _.extend({}, options, {
+      url: this.policy.getUrl(model, this.method, options),
+      collection: this.policy.getCollection(model, options),
+      model: model
+    });
+  },
+
   // Cache the response when the success callback is called
   _wrapSuccessWithCache: function (method, model, options) {
     return this._wrapMethod(method, model, _.extend({
@@ -207,7 +213,7 @@ _.extend(Strategy.prototype, Hoard.Events, {
     var callback = options[method] || function () { return response };
     return function () {
       return callback(response);
-    }
+    };
   }
 });
 

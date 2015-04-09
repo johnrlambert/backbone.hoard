@@ -26,6 +26,10 @@ describe("Read Strategy", function () {
       store: this.store,
       policy: this.policy
     });
+
+    this.sinon.stub(this.strategy, 'decorateOptions', function (model, options) {
+      return options;
+    });
   });
 
   describe("on a cache miss", function () {
@@ -37,7 +41,7 @@ describe("Read Strategy", function () {
       this.sinon.stub(this.store, 'set').returns(this.setPromise);
       this.sinon.stub(this.store, 'invalidate').returns(Hoard.Promise.resolve());
 
-      this.metadata = { myMeta: true};
+      this.metadata = { myMeta: true };
       this.serverResponse = { myResponse: true };
       this.sinon.stub(this.policy, 'getMetadata').returns(this.metadata);
 
