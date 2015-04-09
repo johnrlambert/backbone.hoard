@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/cmaher/backbone.hoard.svg?branch=master)](https://travis-ci.org/cmaher/backbone.hoard)
+[![Build Status](https://travis-ci.org/Conductor/backbone.hoard.svg?branch=master)](https://travis-ci.org/Conductor/backbone.hoard)
 
 backbone.hoard
 --------------
