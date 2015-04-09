@@ -90,7 +90,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 	
 	var Backbone = __webpack_require__(1);
-	var Backend = __webpack_require__(16);
+	var Backend = __webpack_require__(8);
 	
 	var Hoard = {
 	  VERSION: '0.4.0',
@@ -132,9 +132,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _ = __webpack_require__(7);
 	var Hoard = __webpack_require__(2);
-	var MetaStore = __webpack_require__(8);
-	var StoreHelpers = __webpack_require__(9);
-	var Lock = __webpack_require__(10);
+	var MetaStore = __webpack_require__(9);
+	var StoreHelpers = __webpack_require__(10);
+	var Lock = __webpack_require__(11);
 	
 	var mergeOptions = ['backend', 'metaStoreClass'];
 	
@@ -321,11 +321,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Hoard = __webpack_require__(2);
 	var Store = __webpack_require__(3);
 	var Policy = __webpack_require__(4);
-	var CreateStrategyClass = __webpack_require__(11);
-	var ReadStrategyClass = __webpack_require__(12);
-	var UpdateStrategyClass = __webpack_require__(13);
-	var PatchStrategyClass = __webpack_require__(14);
-	var DeleteStrategyClass = __webpack_require__(15);
+	var CreateStrategyClass = __webpack_require__(12);
+	var ReadStrategyClass = __webpack_require__(13);
+	var UpdateStrategyClass = __webpack_require__(14);
+	var PatchStrategyClass = __webpack_require__(15);
+	var DeleteStrategyClass = __webpack_require__(16);
 	
 	// Configuration information to ease the creation of Strategy classes
 	var strategies = {
@@ -428,7 +428,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _ = __webpack_require__(7);
 	var Hoard = __webpack_require__(2);
-	var Lock = __webpack_require__(10);
+	var Lock = __webpack_require__(11);
 	
 	var mergeOptions = ['store', 'policy'];
 	
@@ -448,10 +448,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  // Take care of all caching/server requesting.
 	  // This is the main strategy method and entry point from Hoard.Control
 	  execute: function (model, options) {
-	    options.url = this.policy.getUrl(model, this.method, options);
-	    options.collection = this.policy.getCollection(model, options);
-	    options.model = model;
-	    return this.sync(model, options);
+	    var hoardOptions = this.decorateOptions(model, options);
+	    return this.sync(model, hoardOptions);
 	  },
 	
 	  // If the model belongs to a collection and that collection is cached,
@@ -579,6 +577,14 @@ return /******/ (function(modules) { // webpackBootstrap
 	    return response;
 	  },
 	
+	  decorateOptions: function (model, options) {
+	    return _.extend({}, options, {
+	      url: this.policy.getUrl(model, this.method, options),
+	      collection: this.policy.getCollection(model, options),
+	      model: model
+	    });
+	  },
+	
 	  // Cache the response when the success callback is called
 	  _wrapSuccessWithCache: function (method, model, options) {
 	    return this._wrapMethod(method, model, _.extend({
@@ -633,7 +639,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	    var callback = options[method] || function () { return response };
 	    return function () {
 	      return callback(response);
-	    }
+	    };
 	  }
 	});
 	
@@ -655,8 +661,68 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 	
 	var _ = __webpack_require__(7);
+	
+	// Mimic the API of localStorage
+	// All operations expect JSON strings to be stored and returned
+	var Backend = function () {
+	  this.clear();
+	};
+	
+	_.extend(Backend.prototype, {
+	  // around 5MB, matching common localStorage limit
+	  maxSize: 5000000,
+	
+	  // Store the given value and update the size
+	  setItem: function (key, value) {
+	    if (this.size + value.length > this.maxSize) {
+	      // Notify Hoard that the cache is full.
+	      // This will trigger a cache invalidation.
+	      throw new Error("On-Page Cache size exceeded");
+	    } else {
+	      this.storage[key] = value;
+	      this.size += value.length;
+	    }
+	  },
+	
+	  // Get the item with the given key from the cache
+	  // or null if the item is not found
+	  getItem: function (key) {
+	    var value = this.storage[key];
+	    if (_.isUndefined(value)) {
+	      value = null;
+	    }
+	    return value;
+	  },
+	
+	  // Remove the item with the given key
+	  // And update the size of the cache
+	  removeItem: function (key) {
+	    var value = this.getItem(key);
+	    delete this.storage[key];
+	    if (value != null) {
+	      this.size -= value.length;
+	    }
+	    return value;
+	  },
+	
+	  clear: function () {
+	    this.storage = {};
+	    this.size = 0;
+	  }
+	});
+	
+	module.exports = Backend;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _ = __webpack_require__(7);
 	var Hoard = __webpack_require__(2);
-	var StoreHelpers = __webpack_require__(9);
+	var StoreHelpers = __webpack_require__(10);
 	
 	var mergeOptions = ['backend', 'key'];
 	
@@ -726,7 +792,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -774,7 +840,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -896,7 +962,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Lock;
 
 /***/ },
-/* 11 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -915,7 +981,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 12 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1035,7 +1101,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Read;
 
 /***/ },
-/* 13 */
+/* 14 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1046,7 +1112,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 14 */
+/* 15 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1070,7 +1136,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 16 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1092,66 +1158,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	
 	module.exports = Delete;
-
-/***/ },
-/* 16 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _ = __webpack_require__(7);
-	
-	// Mimic the API of localStorage
-	// All operations expect JSON strings to be stored and returned
-	var Backend = function () {
-	  this.clear();
-	};
-	
-	_.extend(Backend.prototype, {
-	  // around 5MB, matching common localStorage limit
-	  maxSize: 5000000,
-	
-	  // Store the given value and update the size
-	  setItem: function (key, value) {
-	    if (this.size + value.length > this.maxSize) {
-	      // Notify Hoard that the cache is full.
-	      // This will trigger a cache invalidation.
-	      throw new Error("On-Page Cache size exceeded");
-	    } else {
-	      this.storage[key] = value;
-	      this.size += value.length;
-	    }
-	  },
-	
-	  // Get the item with the given key from the cache
-	  // or null if the item is not found
-	  getItem: function (key) {
-	    var value = this.storage[key];
-	    if (_.isUndefined(value)) {
-	      value = null;
-	    }
-	    return value;
-	  },
-	
-	  // Remove the item with the given key
-	  // And update the size of the cache
-	  removeItem: function (key) {
-	    var value = this.getItem(key);
-	    delete this.storage[key];
-	    if (value != null) {
-	      this.size -= value.length;
-	    }
-	    return value;
-	  },
-	
-	  clear: function () {
-	    this.storage = {};
-	    this.size = 0;
-	  }
-	});
-	
-	module.exports = Backend;
-
 
 /***/ },
 /* 17 */
