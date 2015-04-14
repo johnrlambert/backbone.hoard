@@ -86,6 +86,16 @@
     </section>
 
     <section>
+      <h2>What does this look like?</h2>
+      <iframe width="60%" height="300" src="//jsfiddle.net/cmaher/b5bk5vbx/embedded/result" allowfullscreen="allowfullscreen" frameborder="0"></iframe>
+      <aside class="notes">
+        <ul>
+          <li>Clicking things without enabling Hoard demonstrates unconsolidated, uncached fetches</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section>
       <section>
         <h2>Dashboard Applications</h2>
 
@@ -250,18 +260,18 @@ var model2 = new MyModel({ id: 1 });
 
             <div class="routing-app">
               <ul class="users-list">
-                <li><a href="#/6">Users</a></li>
+                <li><a href="#/7">Users</a></li>
                 <li class="user">
                   <img class="avatar" src="./images/cmaher-now.jpg">
-                  <a href="#/6/1" class="user-link">cmaher (now)</a>
+                  <a href="#/7/1" class="user-link">cmaher (now)</a>
                 </li>
                 <li class="user">
                   <img class="avatar" src="./images/cmaher-then.jpg">
-                  <a href="#/6/2" class="user-link">cmaher (then)</a>
+                  <a href="#/7/2" class="user-link">cmaher (then)</a>
                 </li>
                 <li class="user">
                   <img class="avatar" src="./images/sloth.jpg">
-                  <a href="#/6/3" class="user-link">sloth</a>
+                  <a href="#/7/3" class="user-link">sloth</a>
                 </li>
               </ul>
               <div class="users-details">
@@ -312,18 +322,18 @@ var model2 = new MyModel({ id: 1 });
 
             <div class="routing-app">
               <ul class="users-list">
-                <li><a href="#/6">Users</a></li>
+                <li><a href="#/7">Users</a></li>
                 <li class="user">
                   <img class="avatar" src="./images/cmaher-now.jpg">
-                  <a href="#/6/1" class="user-link">cmaher (now)</a>
+                  <a href="#/7/1" class="user-link">cmaher (now)</a>
                 </li>
                 <li class="user">
                   <img class="avatar" src="./images/cmaher-then.jpg">
-                  <a href="#/6/2" class="user-link">cmaher (then)</a>
+                  <a href="#/7/2" class="user-link">cmaher (then)</a>
                 </li>
                 <li class="user">
                   <img class="avatar" src="./images/sloth.jpg">
-                  <a href="#/6/3" class="user-link">sloth</a>
+                  <a href="#/7/3" class="user-link">sloth</a>
                 </li>
               </ul>
               <div class="users-details">
@@ -333,7 +343,7 @@ var model2 = new MyModel({ id: 1 });
 
                 <p>Following</p>
                 <ul>
-                  <li><a href="#/6/3" class="user-link">Space Sloth</a></li>
+                  <li><a href="#/7/3" class="user-link">Space Sloth</a></li>
                 </ul>
               </div>
             </div>
@@ -350,18 +360,18 @@ var model2 = new MyModel({ id: 1 });
 
             <div class="routing-app">
               <ul class="users-list">
-                <li><a href="#/6">Users</a></li>
+                <li><a href="#/7">Users</a></li>
                 <li class="user">
                   <img class="avatar" src="./images/cmaher-now.jpg">
-                  <a href="#/6/1" class="user-link">cmaher (now)</a>
+                  <a href="#/7/1" class="user-link">cmaher (now)</a>
                 </li>
                 <li class="user">
                   <img class="avatar" src="./images/cmaher-then.jpg">
-                  <a href="#/6/2" class="user-link">cmaher (then)</a>
+                  <a href="#/7/2" class="user-link">cmaher (then)</a>
                 </li>
                 <li class="user">
                   <img class="avatar" src="./images/sloth.jpg">
-                  <a href="#/6/3" class="user-link">sloth</a>
+                  <a href="#/7/3" class="user-link">sloth</a>
                 </li>
               </ul>
               <div class="users-details">
@@ -371,7 +381,7 @@ var model2 = new MyModel({ id: 1 });
 
                 <p>Following</p>
                 <ul>
-                  <li><a href="#/6/1" class="user-link">Christian (now)</a></li>
+                  <li><a href="#/7/1" class="user-link">Christian (now)</a></li>
                 </ul>
               </div>
             </div>
@@ -388,18 +398,18 @@ var model2 = new MyModel({ id: 1 });
 
             <div class="routing-app">
               <ul class="users-list">
-                <li><a href="#/6">Users</a></li>
+                <li><a href="#/7">Users</a></li>
                 <li class="user">
                   <img class="avatar" src="./images/cmaher-now.jpg">
-                  <a href="#/6/1" class="user-link">cmaher (now)</a>
+                  <a href="#/7/1" class="user-link">cmaher (now)</a>
                 </li>
                 <li class="user">
                   <img class="avatar" src="./images/cmaher-then.jpg">
-                  <a href="#/6/2" class="user-link">cmaher (then)</a>
+                  <a href="#/7/2" class="user-link">cmaher (then)</a>
                 </li>
                 <li class="user">
                   <img class="avatar" src="./images/sloth.jpg">
-                  <a href="#/6/3" class="user-link">sloth</a>
+                  <a href="#/7/3" class="user-link">sloth</a>
                 </li>
               </ul>
               <div class="users-details">
@@ -409,7 +419,7 @@ var model2 = new MyModel({ id: 1 });
 
                 <p>Following</p>
                 <ul>
-                  <li><a href="#/6/1" class="user-link">Christian (now)</a></li>
+                  <li><a href="#/7/1" class="user-link">Christian (now)</a></li>
                 </ul>
               </div>
             </div>
@@ -512,22 +522,35 @@ model.fetch().then(function () {
 
     <section>
       <h2>What About...</h2>
-
       <ul>
-        <li class="fragment">
-          Backbone Plugins
-          <ul>
-            <li>backbone-fetch-cache</li>
-            <li>backbone.cachingSync</li>
-          </ul>
-        </li>
-        <li class="fragment">
-          HTTP Headers
-          <ul>
-            <li>cache-control</li>
-            <li>etag</li>
-          </ul>
-        </li>
+        <li class="fragment">Dependency Injection</li>
+        <li class="fragment">Existing Backbone Plugins</li>
+        <li class="fragment">HTTP Headers</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Dependency Injection</h2>
+      <ul>
+        <li class="fragment">Complicated events</li>
+        <li class="fragment">Imperfect key generation</li>
+        <li class="fragment">Multiple fetches on change</li>
+      </ul>
+
+      <aside class="notes">
+        <ul>
+          <li>This is what we originally did (PageDataProvider)</li>
+          <li>Use initial attributes and options to retrieve same model instance</li>
+          <li>Hard to reset listeners if the desired model changes</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section>
+      <h2>Existing Backbone Plugins</h2>
+      <ul class="fragment">
+        <li>backbone-fetch-cache</li>
+        <li>backbone.cachingSync</li>
       </ul>
 
       <aside class="notes">
@@ -535,14 +558,41 @@ model.fetch().then(function () {
           <li>None of the above account for simultaneous requests (dashboard apps).</li>
           <li>Neither one provides async cache support (no indexeddb)</li>
           <li>Not as much configuration (fetch-cache supports custom keys and localStorage or no).</li>
-          <li>ETags still require a trip to the server, but are the better choice for longer-term caching</li>
         </ul>
       </aside>
     </section>
 
     <section>
-      <h5>(Future)</h5>
-      <h2>URL Interpretation</h2>
+      <h2>HTTP Headers</h2>
+      <ul>
+        <li class="fragment">cache-control</li>
+        <li class="fragment">etag</li>
+      </ul>
+
+      <aside class="notes">
+        <ul>
+          <li>cache-control TTL doesn't offer as fine-grained control (great for files)</li>
+          <li>ETags
+            <ul>
+              <li>better for data that cache-control</li>
+              <li>still require a trip to the server</li>
+              <li>better choice for longer-term caching</li>
+            </ul>
+          </li>
+        </ul>
+      </aside>
+    </section>
+
+    <section>
+      <h2>Advanced Use Cases</h2>
+      <ul>
+        <li class="fragment">Key Manipulation and Interpretation</li>
+        <li class="fragment">Chunky Endpoints</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>Key Interpretation</h2>
       <ul>
         <li class="fragment">
           <p>Good RESTful APIs establish patterns</p>
@@ -553,26 +603,88 @@ model.fetch().then(function () {
             <li>?ids=1,2,3</li>
           </ul>
         </li>
-        <li class="fragment">Allow developers to capture those patterns on the client</li>
+        <li class="fragment">Developers can capture those patterns on the client</li>
       </ul>
     </section>
 
     <section>
-      <h5>(Future)</h5>
-      <h2>URL Interpretation</h2>
+      <h2>Key Interpretation</h2>
       <pre><code class="javascript">var coll = new MyCollection({ url: '/models' });
 var filtered = new MyCollection({ url: '/models?filter="odd_id"' });
 Promise.all([coll.fetch(), filtered.fetch()]).then(function () {
   // Only 1 ajax request has been made
   // coll has all models
   // filtered has all models with odd ids
-});
-      </code></pre>
+});</code></pre>
 
       <aside class="notes">
         <ul>
           <li>Good RESTful APIs establish patterns</li>
           <li>Make it so Hoard uses these patterns to pick a more general URL and apply patterns</li>
+          <li>Hoard can currently take advantage of this pattern</li>
+          <li>Originally meant to build out separately, but works with custom keys and Backbone lifecycle</li>
+          <li>Similar to GraphQL in problem that it's trying to address</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section>
+      <h2>Chunky Endpoints</h2>
+
+      <ul>
+        <li class="fragment">Contain potentially unrelated data</li>
+        <li class="fragment">Require processing</li>
+        <li class="fragment">Can be processed in different ways</li>
+      </ul>
+
+      <aside class="notes">
+        <ul>
+          <li>What is a "Chunky" endpoint?</li>
+          <li>Came out of the community!!</li>
+          <li>No one thing needs all calculated values</li>
+          <li>Some calculated values are potentially expensive</li>
+          <li>Working with poorly-factored (from the use perspective) endpoints</li>
+          <li>Good when you don't have control of the endpoint (or it needs to be that way for performance reasons)</li>
+        </ul>
+      </aside>
+    </section>
+
+    <section>
+      <h2>Chunky Endpoints</h2>
+      <pre><code class="javascript">// response from /data.json
+{
+  "a": 1,
+  "b": 2,
+  "c": 3,
+  // ...
+}</code></pre>
+    </section>
+
+    <section>
+      <h2>Chunky Endpoints</h2>
+
+      <pre><code class="javascript">var ChunkModel = Backbone.Model.extend({
+  url: '/data.json',
+  sync: cacheControl.getModelSync()
+});
+
+var ModelOne = ChunkModel.extend({
+  parse: function (data) {
+    return { calculated: data.a + data.b }
+  }
+});
+
+var ModelTwo = ChunkModel.extend({
+  parse: function (data) {
+    return { calculated: data.b * data.c }
+  }
+});</code></pre>
+
+      <aside class="notes">
+        <ul>
+          <li>All models reference the same Endpoint</li>
+          <li>Different parse methods</li>
+          <li>Makes the client side feel clean despite the messy server side</li>
         </ul>
       </aside>
     </section>
@@ -597,7 +709,7 @@ Promise.all([coll.fetch(), filtered.fetch()]).then(function () {
   // Full list of configuration options available at:
   // https://github.com/hakimel/reveal.js#configuration
   Reveal.initialize({
-    controls: true,
+    controls: false,
     progress: false,
     history: true,
     center: true,
