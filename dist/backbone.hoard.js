@@ -132,9 +132,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _ = __webpack_require__(7);
 	var Hoard = __webpack_require__(2);
-	var MetaStore = __webpack_require__(9);
-	var StoreHelpers = __webpack_require__(10);
-	var Lock = __webpack_require__(11);
+	var MetaStore = __webpack_require__(14);
+	var StoreHelpers = __webpack_require__(15);
+	var Lock = __webpack_require__(16);
 	
 	var mergeOptions = ['backend', 'metaStoreClass'];
 	
@@ -321,11 +321,11 @@ return /******/ (function(modules) { // webpackBootstrap
 	var Hoard = __webpack_require__(2);
 	var Store = __webpack_require__(3);
 	var Policy = __webpack_require__(4);
-	var CreateStrategyClass = __webpack_require__(12);
-	var ReadStrategyClass = __webpack_require__(13);
-	var UpdateStrategyClass = __webpack_require__(14);
-	var PatchStrategyClass = __webpack_require__(15);
-	var DeleteStrategyClass = __webpack_require__(16);
+	var CreateStrategyClass = __webpack_require__(9);
+	var ReadStrategyClass = __webpack_require__(10);
+	var UpdateStrategyClass = __webpack_require__(11);
+	var PatchStrategyClass = __webpack_require__(12);
+	var DeleteStrategyClass = __webpack_require__(13);
 	
 	// Configuration information to ease the creation of Strategy classes
 	var strategies = {
@@ -428,7 +428,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _ = __webpack_require__(7);
 	var Hoard = __webpack_require__(2);
-	var Lock = __webpack_require__(11);
+	var Lock = __webpack_require__(16);
 	
 	var mergeOptions = ['store', 'policy'];
 	
@@ -720,253 +720,6 @@ return /******/ (function(modules) { // webpackBootstrap
 
 	'use strict';
 	
-	var _ = __webpack_require__(7);
-	var Hoard = __webpack_require__(2);
-	var StoreHelpers = __webpack_require__(10);
-	
-	var mergeOptions = ['backend', 'key'];
-	
-	// The meta store stores all metadata about items in a single entry in the backend.
-	// A single entry is used so we can easily iterate over managed keys
-	// This API should currently be considered private
-	var MetaStore = function (options) {
-	  _.extend(this, _.pick(options || {}, mergeOptions));
-	  _.defaults(this, { backend: Hoard.backend });
-	  this.initialize.apply(this, arguments);
-	};
-	
-	
-	_.extend(MetaStore.prototype, Hoard.Events, {
-	  initialize: function () {},
-	
-	  key: 'backbone.hoard.metastore',
-	
-	  set: function (key, meta, options) {
-	    return this._get(options).then(_.bind(function (allMetadata) {
-	      allMetadata[key] = meta;
-	      return this._set(this.key, allMetadata);
-	    }, this));
-	  },
-	
-	  get: function (key, options) {
-	    return this._get(options).then(_.bind(function (allMetadata) {
-	      return allMetadata[key] || {};
-	    }, this));
-	  },
-	
-	  getAll: function (options) {
-	    return this._get(options);
-	  },
-	
-	  invalidate: function (key, options) {
-	    return this._get(options).then(_.bind(function (allMetadata) {
-	      delete allMetadata[key];
-	      return this._set(this.key, allMetadata);
-	    }, this));
-	  },
-	
-	  invalidateAll: function (options) {
-	    return this.removeItem(this.key, options);
-	  },
-	
-	  _get: function (options) {
-	    return this.getItem(this.key, options).then(
-	      _.identity,
-	      function () {
-	        return {};
-	      }
-	    );
-	  },
-	
-	  _set: function (key, meta) {
-	    return this.setItem(key, meta);
-	  },
-	
-	  getItem: StoreHelpers.proxyGetItem,
-	  setItem: StoreHelpers.proxySetItem,
-	  removeItem: StoreHelpers.proxyRemoveItem
-	});
-	
-	MetaStore.extend = Hoard._proxyExtend;
-	module.exports = MetaStore;
-
-
-/***/ },
-/* 10 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var Hoard = __webpack_require__(2);
-	var _ = __webpack_require__(7);
-	
-	// Convenience methods for stores
-	module.exports = {
-	  proxySetItem: function (key, value) {
-	    return Hoard.Promise.resolve()
-	      .then(_.bind(function () {
-	        try {
-	          return this.backend.setItem(key, JSON.stringify(value));
-	        } catch (e) {
-	          return Hoard.Promise.reject(e);
-	        }
-	      }, this))
-	      .then(function () {
-	        return value;
-	      });
-	  },
-	
-	  proxyGetItem: function (key, options) {
-	    return Hoard.Promise.resolve()
-	      .then(_.bind(function () {
-	        return this.backend.getItem(key);
-	      }, this))
-	      .then(function (raw) {
-	        var storedValue = JSON.parse(raw);
-	        if (storedValue !== null) {
-	          return storedValue;
-	        } else {
-	          return Hoard.Promise.reject();
-	        }
-	      });
-	  },
-	
-	  proxyRemoveItem: function (key, options) {
-	    return Hoard.Promise.resolve().then(_.bind(function () {
-	      return this.backend.removeItem(key);
-	    }, this));
-	  }
-	};
-
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _ = __webpack_require__(7);
-	var Hoard = __webpack_require__(2);
-	
-	// Internal store to keep track of state of locks
-	// Keyed by lock name
-	// Stores promises indicating lock access and acquisition
-	var locks = {};
-	
-	// Get lock with name lockName if it exists
-	// Create it and return it if it doesn't exist
-	var getLock = function (lockName) {
-	  var lock = locks[lockName];
-	  if (!lock) {
-	    lock = {
-	      accesses: {}
-	    };
-	    locks[lockName] = lock;
-	  }
-	  return lock;
-	};
-	
-	// Return a promise that resolves when all provided promises have either passed or succeeded
-	// This differs from Promise.all in that it will not fail immediately if any of the given promises fail
-	// and will instead fail once all promises have completed
-	var allPromisesComplete = function (promises) {
-	  var finalPromise = Hoard.Promise.resolve;
-	  var allPromise = _.reduce(promises, function (memo, promise) {
-	    var pass = function () { return promise; };
-	    var fail = function () {
-	      finalPromise = Hoard.Promise.reject();
-	      return promise;
-	    };
-	    return memo.then(pass, fail);
-	  }, Hoard.Promise.resolve());
-	  return allPromise.then(function () { return finalPromise; });
-	};
-	
-	// A helper function to wrap a callback with the context of lock access
-	// Lock access context is maintained to allow access nested within a lock call
-	var callWithLockContext = function (lock, isInsideLock, callback) {
-	  return function () {
-	    lock.isInsideLock = isInsideLock;
-	    var value = callback();
-	    delete lock.isInsideLock;
-	    return value;
-	  };
-	};
-	
-	// A utility method to execute a callback
-	// And pass through the failure
-	var rejectCallback = function (callback) {
-	  return function (failure) {
-	    var value = callback(failure);
-	    return Hoard.Promise.reject(value);
-	  };
-	};
-	
-	// A set of methods to
-	// (1) provide exclusive access to a resource
-	// (2) provide unbounded access to a resource in the absence of any exclusive access
-	// This allows normal method behavior, until mutex behavior is needed
-	// Resources are identified by the lockName
-	var Lock = {
-	  // Acquires lock with name lockName if lock is not already acquired or being accessed
-	  // Otherwise, waits until lock is available
-	  withLock: function (lockName, callback) {
-	    var lock = getLock(lockName);
-	    var lockLater = _.bind(this.withLock, this, lockName, callback);
-	
-	    if (lock.locked) {
-	      return lock.locked.then(lockLater, rejectCallback(lockLater));
-	    } else if (!_.isEmpty(lock.accesses)) {
-	      return allPromisesComplete(lock.accesses).then(lockLater, rejectCallback(lockLater));
-	    } else {
-	      var cleanLock = function (value) {
-	        delete lock.locked;
-	        return value;
-	      };
-	      var acquiredLock = Hoard.Promise.resolve()
-	        .then(callWithLockContext(lock, true, callback))
-	        .then(cleanLock, rejectCallback(cleanLock));
-	      lock.locked = acquiredLock;
-	      return acquiredLock;
-	    }
-	  },
-	
-	  // Accesses lock with name lockName if lock is not already acquired
-	  // Otherwise, waits until lock is available
-	  withAccess: function (lockName, callback) {
-	    var lock = getLock(lockName);
-	    if (lock.locked && !lock.isInsideLock) {
-	      var accessLater = _.bind(this.withAccess, this, lockName, callback);
-	      return lock.locked.then(accessLater, rejectCallback(accessLater));
-	    } else {
-	      var accessId = _.uniqueId('backbone.hoard.lock.access_');
-	      var cleanLock = function (value) {
-	        delete lock.accesses[accessId];
-	        return value;
-	      };
-	      var access = Hoard.Promise.resolve()
-	        .then(callWithLockContext(lock, lock.isInsideLock, callback))
-	        .then(cleanLock, rejectCallback(cleanLock));
-	      lock.accesses[accessId] = access;
-	      return access;
-	    }
-	  },
-	
-	  // Remove a lock
-	  // Only to be used for testing
-	  __resetLock: function (lockName) {
-	    delete locks[lockName];
-	  }
-	};
-	
-	module.exports = Lock;
-
-/***/ },
-/* 12 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
 	var PositiveWriteStrategy = __webpack_require__(17);
 	
 	module.exports = PositiveWriteStrategy.extend({
@@ -981,7 +734,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 13 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1101,7 +854,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	module.exports = Read;
 
 /***/ },
-/* 14 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1112,7 +865,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 15 */
+/* 12 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1136,7 +889,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 16 */
+/* 13 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -1158,6 +911,253 @@ return /******/ (function(modules) { // webpackBootstrap
 	});
 	
 	module.exports = Delete;
+
+/***/ },
+/* 14 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _ = __webpack_require__(7);
+	var Hoard = __webpack_require__(2);
+	var StoreHelpers = __webpack_require__(15);
+	
+	var mergeOptions = ['backend', 'key'];
+	
+	// The meta store stores all metadata about items in a single entry in the backend.
+	// A single entry is used so we can easily iterate over managed keys
+	// This API should currently be considered private
+	var MetaStore = function (options) {
+	  _.extend(this, _.pick(options || {}, mergeOptions));
+	  _.defaults(this, { backend: Hoard.backend });
+	  this.initialize.apply(this, arguments);
+	};
+	
+	
+	_.extend(MetaStore.prototype, Hoard.Events, {
+	  initialize: function () {},
+	
+	  key: 'backbone.hoard.metastore',
+	
+	  set: function (key, meta, options) {
+	    return this._get(options).then(_.bind(function (allMetadata) {
+	      allMetadata[key] = meta;
+	      return this._set(this.key, allMetadata);
+	    }, this));
+	  },
+	
+	  get: function (key, options) {
+	    return this._get(options).then(_.bind(function (allMetadata) {
+	      return allMetadata[key] || {};
+	    }, this));
+	  },
+	
+	  getAll: function (options) {
+	    return this._get(options);
+	  },
+	
+	  invalidate: function (key, options) {
+	    return this._get(options).then(_.bind(function (allMetadata) {
+	      delete allMetadata[key];
+	      return this._set(this.key, allMetadata);
+	    }, this));
+	  },
+	
+	  invalidateAll: function (options) {
+	    return this.removeItem(this.key, options);
+	  },
+	
+	  _get: function (options) {
+	    return this.getItem(this.key, options).then(
+	      _.identity,
+	      function () {
+	        return {};
+	      }
+	    );
+	  },
+	
+	  _set: function (key, meta) {
+	    return this.setItem(key, meta);
+	  },
+	
+	  getItem: StoreHelpers.proxyGetItem,
+	  setItem: StoreHelpers.proxySetItem,
+	  removeItem: StoreHelpers.proxyRemoveItem
+	});
+	
+	MetaStore.extend = Hoard._proxyExtend;
+	module.exports = MetaStore;
+
+
+/***/ },
+/* 15 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var Hoard = __webpack_require__(2);
+	var _ = __webpack_require__(7);
+	
+	// Convenience methods for stores
+	module.exports = {
+	  proxySetItem: function (key, value) {
+	    return Hoard.Promise.resolve()
+	      .then(_.bind(function () {
+	        try {
+	          return this.backend.setItem(key, JSON.stringify(value));
+	        } catch (e) {
+	          return Hoard.Promise.reject(e);
+	        }
+	      }, this))
+	      .then(function () {
+	        return value;
+	      });
+	  },
+	
+	  proxyGetItem: function (key, options) {
+	    return Hoard.Promise.resolve()
+	      .then(_.bind(function () {
+	        return this.backend.getItem(key);
+	      }, this))
+	      .then(function (raw) {
+	        var storedValue = JSON.parse(raw);
+	        if (storedValue !== null) {
+	          return storedValue;
+	        } else {
+	          return Hoard.Promise.reject();
+	        }
+	      });
+	  },
+	
+	  proxyRemoveItem: function (key, options) {
+	    return Hoard.Promise.resolve().then(_.bind(function () {
+	      return this.backend.removeItem(key);
+	    }, this));
+	  }
+	};
+
+
+/***/ },
+/* 16 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _ = __webpack_require__(7);
+	var Hoard = __webpack_require__(2);
+	
+	// Internal store to keep track of state of locks
+	// Keyed by lock name
+	// Stores promises indicating lock access and acquisition
+	var locks = {};
+	
+	// Get lock with name lockName if it exists
+	// Create it and return it if it doesn't exist
+	var getLock = function (lockName) {
+	  var lock = locks[lockName];
+	  if (!lock) {
+	    lock = {
+	      accesses: {}
+	    };
+	    locks[lockName] = lock;
+	  }
+	  return lock;
+	};
+	
+	// Return a promise that resolves when all provided promises have either passed or succeeded
+	// This differs from Promise.all in that it will not fail immediately if any of the given promises fail
+	// and will instead fail once all promises have completed
+	var allPromisesComplete = function (promises) {
+	  var finalPromise = Hoard.Promise.resolve;
+	  var allPromise = _.reduce(promises, function (memo, promise) {
+	    var pass = function () { return promise; };
+	    var fail = function () {
+	      finalPromise = Hoard.Promise.reject();
+	      return promise;
+	    };
+	    return memo.then(pass, fail);
+	  }, Hoard.Promise.resolve());
+	  return allPromise.then(function () { return finalPromise; });
+	};
+	
+	// A helper function to wrap a callback with the context of lock access
+	// Lock access context is maintained to allow access nested within a lock call
+	var callWithLockContext = function (lock, isInsideLock, callback) {
+	  return function () {
+	    lock.isInsideLock = isInsideLock;
+	    var value = callback();
+	    delete lock.isInsideLock;
+	    return value;
+	  };
+	};
+	
+	// A utility method to execute a callback
+	// And pass through the failure
+	var rejectCallback = function (callback) {
+	  return function (failure) {
+	    var value = callback(failure);
+	    return Hoard.Promise.reject(value);
+	  };
+	};
+	
+	// A set of methods to
+	// (1) provide exclusive access to a resource
+	// (2) provide unbounded access to a resource in the absence of any exclusive access
+	// This allows normal method behavior, until mutex behavior is needed
+	// Resources are identified by the lockName
+	var Lock = {
+	  // Acquires lock with name lockName if lock is not already acquired or being accessed
+	  // Otherwise, waits until lock is available
+	  withLock: function (lockName, callback) {
+	    var lock = getLock(lockName);
+	    var lockLater = _.bind(this.withLock, this, lockName, callback);
+	
+	    if (lock.locked) {
+	      return lock.locked.then(lockLater, rejectCallback(lockLater));
+	    } else if (!_.isEmpty(lock.accesses)) {
+	      return allPromisesComplete(lock.accesses).then(lockLater, rejectCallback(lockLater));
+	    } else {
+	      var cleanLock = function (value) {
+	        delete lock.locked;
+	        return value;
+	      };
+	      var acquiredLock = Hoard.Promise.resolve()
+	        .then(callWithLockContext(lock, true, callback))
+	        .then(cleanLock, rejectCallback(cleanLock));
+	      lock.locked = acquiredLock;
+	      return acquiredLock;
+	    }
+	  },
+	
+	  // Accesses lock with name lockName if lock is not already acquired
+	  // Otherwise, waits until lock is available
+	  withAccess: function (lockName, callback) {
+	    var lock = getLock(lockName);
+	    if (lock.locked && !lock.isInsideLock) {
+	      var accessLater = _.bind(this.withAccess, this, lockName, callback);
+	      return lock.locked.then(accessLater, rejectCallback(accessLater));
+	    } else {
+	      var accessId = _.uniqueId('backbone.hoard.lock.access_');
+	      var cleanLock = function (value) {
+	        delete lock.accesses[accessId];
+	        return value;
+	      };
+	      var access = Hoard.Promise.resolve()
+	        .then(callWithLockContext(lock, lock.isInsideLock, callback))
+	        .then(cleanLock, rejectCallback(cleanLock));
+	      lock.accesses[accessId] = access;
+	      return access;
+	    }
+	  },
+	
+	  // Remove a lock
+	  // Only to be used for testing
+	  __resetLock: function (lockName) {
+	    delete locks[lockName];
+	  }
+	};
+	
+	module.exports = Lock;
 
 /***/ },
 /* 17 */
