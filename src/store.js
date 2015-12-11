@@ -37,13 +37,13 @@ _.extend(Store.prototype, Hoard.Events, {
       _.identity,
       _.bind(function (error) {
         var errorHandler = function () {
-          return Hoard.Promise.reject({
+          return Hoard.Promise.reject(new Error({
             key: key,
             value: item,
             meta: meta,
             error: error,
             options: options
-          });
+          }));
         };
         return this.invalidate(key, options)
           .then(errorHandler, errorHandler);

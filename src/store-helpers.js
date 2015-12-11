@@ -29,7 +29,7 @@ module.exports = {
         if (storedValue !== null) {
           return storedValue;
         } else {
-          return Hoard.Promise.reject();
+          return Hoard.Promise.reject(new Error('Not found'));
         }
       });
   },

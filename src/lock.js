@@ -28,8 +28,8 @@ var allPromisesComplete = function (promises) {
   var finalPromise = Hoard.Promise.resolve;
   var allPromise = _.reduce(promises, function (memo, promise) {
     var pass = function () { return promise; };
-    var fail = function () {
-      finalPromise = Hoard.Promise.reject();
+    var fail = function (error) {
+      finalPromise = Hoard.Promise.reject(error);
       return promise;
     };
     return memo.then(pass, fail);
