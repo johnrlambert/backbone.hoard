@@ -136,12 +136,21 @@ _.extend(Strategy.prototype, Hoard.Events, {
           }, this);
           return Hoard.Promise.all(evictions);
         } else {
-          return Hoard.Promise.reject();
+          return Hoard.Promise.reject(new Error({
+            message: 'Could not clear memory',
+            error: error,
+            value: value
+          }));
         }
       }, this));
     }, this)).then(
       _.bind(this.set, this, key, value, meta, options),
-      function () { return Hoard.Promise.reject(value); }
+      function () {
+        return Hoard.Promise.reject(new Error({
+          value: value,
+          error: error
+        }));
+      }
     );
   },
 
