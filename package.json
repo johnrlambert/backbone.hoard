@@ -2,7 +2,7 @@
   "name": "backbone.hoard",
   "repository": "https://github.com/Conductor/backbone.hoard",
   "homepage": "http://cmaher.github.io/backbone.hoard/",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "XHR Consolidation and Caching for Backbone",
   "main": "dist/backbone.hoard.js",
   "scripts": {

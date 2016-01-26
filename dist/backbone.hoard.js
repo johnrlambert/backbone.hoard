@@ -167,13 +167,13 @@ return /******/ (function(modules) { // webpackBootstrap
 	      _.identity,
 	      _.bind(function (error) {
 	        var errorHandler = function () {
-	          return Hoard.Promise.reject({
+	          return Hoard.Promise.reject(new Error({
 	            key: key,
 	            value: item,
 	            meta: meta,
 	            error: error,
 	            options: options
-	          });
+	          }));
 	        };
 	        return this.invalidate(key, options)
 	          .then(errorHandler, errorHandler);
@@ -562,12 +562,21 @@ return /******/ (function(modules) { // webpackBootstrap
 	          }, this);
 	          return Hoard.Promise.all(evictions);
 	        } else {
-	          return Hoard.Promise.reject();
+	          return Hoard.Promise.reject(new Error({
+	            message: 'Could not clear memory',
+	            error: error,
+	            value: value
+	          }));
 	        }
 	      }, this));
 	    }, this)).then(
 	      _.bind(this.set, this, key, value, meta, options),
-	      function () { return Hoard.Promise.reject(value); }
+	      function () {
+	        return Hoard.Promise.reject(new Error({
+	          value: value,
+	          error: error
+	        }));
+	      }
 	    );
 	  },
 	
@@ -1024,7 +1033,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	        if (storedValue !== null) {
 	          return storedValue;
 	        } else {
-	          return Hoard.Promise.reject();
+	          return Hoard.Promise.reject(new Error('Not found'));
 	        }
 	      });
 	  },
@@ -1071,8 +1080,8 @@ return /******/ (function(modules) { // webpackBootstrap
 	  var finalPromise = Hoard.Promise.resolve;
 	  var allPromise = _.reduce(promises, function (memo, promise) {
 	    var pass = function () { return promise; };
-	    var fail = function () {
-	      finalPromise = Hoard.Promise.reject();
+	    var fail = function (error) {
+	      finalPromise = Hoard.Promise.reject(error);
 	      return promise;
 	    };
 	    return memo.then(pass, fail);
