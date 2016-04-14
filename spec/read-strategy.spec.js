@@ -43,14 +43,25 @@ describe("Read Strategy", function () {
 
       this.metadata = { myMeta: true };
       this.serverResponse = { myResponse: true };
+      this.serverResponseTextStatus = 'OK';
+      this.serverResponseXHR = { status: 200 };
       this.sinon.stub(this.policy, 'getMetadata').returns(this.metadata);
 
       this.execution = this.strategy.execute(this.model, this.options);
     });
 
     it("returns a promise that resolves when the get and sync resolve", function () {
-      this.ajax.resolve(this.serverResponse);
+      this.ajax.resolve([this.serverResponse]);
       return expect(this.execution).to.have.been.fulfilled;
+    });
+    
+    it("resolves the promise with the arguments passed to the success callback", function () {
+      var expectedResponseArguments = [this.serverResponse, this.serverResponseTextStatus, this.serverResponseXHR];
+      this.ajax.resolve(expectedResponseArguments);
+      this.execution.then(function (responseArgs) {
+        expect(responseArgs).to.eql(expectedResponseArguments);
+      }.bind(this));
+      return this.execution;
     });
 
     it("writes a placeholder", function () {
@@ -59,7 +70,7 @@ describe("Read Strategy", function () {
     });
 
     it("writes to the cache on a successful sync", function () {
-      this.ajax.resolve(this.serverResponse);
+      this.ajax.resolve([this.serverResponse]);
       return this.execution.then(function () {
         expect(this.store.set).to.have.been.calledOnce
           .and.calledWith(this.key, this.serverResponse, this.metadata);
@@ -67,7 +78,7 @@ describe("Read Strategy", function () {
     });
 
     it("invalidates the cache on a failed sync", function () {
-      this.ajax.reject(this.serverResponse);
+      this.ajax.reject([this.serverResponse]);
       return this.execution.catch(function () {
         expect(this.store.invalidate).to.have.been.calledOnce
           .and.calledWith(this.key);
@@ -90,6 +101,12 @@ describe("Read Strategy", function () {
       expect(this.store.invalidate).to.have.been.calledOnce
         .and.calledWith(this.key);
     });
+    
+    it("resolves the execution promise with no server response", function () {
+      return this.execution.then(function (serverResponse) {
+        expect(serverResponse).to.be.undefined;
+      });
+    });
 
     it("acts as a cache miss", function () {
       expect(this.strategy.onCacheMiss).to.have.been.calledOnce
@@ -110,7 +127,7 @@ describe("Read Strategy", function () {
     });
 
     it("calls options.success on a successful cache", function () {
-      this.serverDeferred.resolve(this.serverResponse);
+      this.serverDeferred.resolve([this.serverResponse]);
       return this.execution.then(function () {
         expect(this.options.success).to.have.been.calledOnce
           .and.calledWith(this.serverResponse);
@@ -118,7 +135,7 @@ describe("Read Strategy", function () {
     });
 
     it("calls options.error on an error cache event", function () {
-      this.serverDeferred.reject(this.serverResponse);
+      this.serverDeferred.reject([this.serverResponse]);
       return this.execution.then(undefined, function () {
         expect(this.options.error).to.have.been.calledOnce
           .and.calledWith(this.serverResponse);
@@ -162,7 +179,7 @@ describe("Read Strategy", function () {
 
         this.missDeferreds[0].reject();
         return this.missDeferreds[0].promise.catch(function () {
-          this.ajax.resolve(this.response);
+          this.ajax.resolve([this.response]);
           return this.executions[0];
         }.bind(this)).then(function () {
           this.missDeferreds[1].reject();

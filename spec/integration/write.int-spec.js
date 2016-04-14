@@ -68,6 +68,13 @@ module.exports = function (storageName, storage) {
             expect(this.requests['GET:/models/1']).to.be.undefined;
           }.bind(this));
         });
+
+        it("resolves the cached fetch promise with all the original sync promise resolution arguments", function () {
+          return this.model.fetch().then(function (responseArgs) {
+            expect(responseArgs.length).to.equal(1);
+            expect(responseArgs[0].value).to.eql(1);
+          }.bind(this));
+        });
       });
 
       describe("for a model in a collection", function () {

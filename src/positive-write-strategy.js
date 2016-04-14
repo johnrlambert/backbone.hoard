@@ -19,8 +19,13 @@ module.exports = Strategy.extend({
     }, options, this.cacheOptions(model, options));
 
     options.success = this._wrapSuccessWithCache(this.method, model, cacheOptions);
-    Hoard.sync(this.method, model, options);
-    return storeComplete.promise;
+    var syncPromise = Hoard.sync(this.method, model, options);
+    // if the store action is successful, we then return a promise
+    // that will resolve with an array of all the arguments the orig
+    // sync promise resolves with.
+    return storeComplete.promise.then(_.bind(function () {
+      return this._wrapSyncResponsePromise(syncPromise);
+    }, this));
   },
 
   cacheOptions: function (model, options) {}

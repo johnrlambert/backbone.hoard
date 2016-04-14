@@ -20,14 +20,13 @@ var stubAjax = function (spec) {
   spec.ajaxResponse = ajaxResponse.promise;
 
   spec.sinon.stub(Backbone, 'ajax', function (options) {
-    ajax.promise.then(function (serverResponse) {
-      options.success(serverResponse);
-    }, function (serverError) {
-      options.error(serverError);
+    ajax.promise.then(function (responseArgs) {
+      options.success.apply(null, responseArgs);
+    }, function (errorResponseArgs) {
+      options.success.apply(null, errorResponseArgs);
     }).then(function () {
       ajaxResponse.resolve();
     });
-
     return ajaxResponse.promise;
   });
 };
