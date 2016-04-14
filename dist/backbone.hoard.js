@@ -90,7 +90,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 	
 	var Backbone = __webpack_require__(1);
-	var Backend = __webpack_require__(11);
+	var Backend = __webpack_require__(8);
 	
 	var Hoard = {
 	
@@ -131,9 +131,9 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _ = __webpack_require__(7);
 	var Hoard = __webpack_require__(2);
-	var MetaStore = __webpack_require__(8);
-	var StoreHelpers = __webpack_require__(9);
-	var Lock = __webpack_require__(10);
+	var MetaStore = __webpack_require__(9);
+	var StoreHelpers = __webpack_require__(10);
+	var Lock = __webpack_require__(11);
 	
 	var mergeOptions = ['backend', 'metaStoreClass'];
 	
@@ -427,7 +427,7 @@ return /******/ (function(modules) { // webpackBootstrap
 	
 	var _ = __webpack_require__(7);
 	var Hoard = __webpack_require__(2);
-	var Lock = __webpack_require__(10);
+	var Lock = __webpack_require__(11);
 	
 	var mergeOptions = ['store', 'policy'];
 	
@@ -682,8 +682,68 @@ return /******/ (function(modules) { // webpackBootstrap
 	'use strict';
 	
 	var _ = __webpack_require__(7);
+	
+	// Mimic the API of localStorage
+	// All operations expect JSON strings to be stored and returned
+	var Backend = function () {
+	  this.clear();
+	};
+	
+	_.extend(Backend.prototype, {
+	  // around 5MB, matching common localStorage limit
+	  maxSize: 5000000,
+	
+	  // Store the given value and update the size
+	  setItem: function (key, value) {
+	    if (this.size + value.length > this.maxSize) {
+	      // Notify Hoard that the cache is full.
+	      // This will trigger a cache invalidation.
+	      throw new Error("On-Page Cache size exceeded");
+	    } else {
+	      this.storage[key] = value;
+	      this.size += value.length;
+	    }
+	  },
+	
+	  // Get the item with the given key from the cache
+	  // or null if the item is not found
+	  getItem: function (key) {
+	    var value = this.storage[key];
+	    if (_.isUndefined(value)) {
+	      value = null;
+	    }
+	    return value;
+	  },
+	
+	  // Remove the item with the given key
+	  // And update the size of the cache
+	  removeItem: function (key) {
+	    var value = this.getItem(key);
+	    delete this.storage[key];
+	    if (value != null) {
+	      this.size -= value.length;
+	    }
+	    return value;
+	  },
+	
+	  clear: function () {
+	    this.storage = {};
+	    this.size = 0;
+	  }
+	});
+	
+	module.exports = Backend;
+
+
+/***/ },
+/* 9 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+	
+	var _ = __webpack_require__(7);
 	var Hoard = __webpack_require__(2);
-	var StoreHelpers = __webpack_require__(9);
+	var StoreHelpers = __webpack_require__(10);
 	
 	var mergeOptions = ['backend', 'key'];
 	
@@ -753,7 +813,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 9 */
+/* 10 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -801,7 +861,7 @@ return /******/ (function(modules) { // webpackBootstrap
 
 
 /***/ },
-/* 10 */
+/* 11 */
 /***/ function(module, exports, __webpack_require__) {
 
 	'use strict';
@@ -921,66 +981,6 @@ return /******/ (function(modules) { // webpackBootstrap
 	};
 	
 	module.exports = Lock;
-
-/***/ },
-/* 11 */
-/***/ function(module, exports, __webpack_require__) {
-
-	'use strict';
-	
-	var _ = __webpack_require__(7);
-	
-	// Mimic the API of localStorage
-	// All operations expect JSON strings to be stored and returned
-	var Backend = function () {
-	  this.clear();
-	};
-	
-	_.extend(Backend.prototype, {
-	  // around 5MB, matching common localStorage limit
-	  maxSize: 5000000,
-	
-	  // Store the given value and update the size
-	  setItem: function (key, value) {
-	    if (this.size + value.length > this.maxSize) {
-	      // Notify Hoard that the cache is full.
-	      // This will trigger a cache invalidation.
-	      throw new Error("On-Page Cache size exceeded");
-	    } else {
-	      this.storage[key] = value;
-	      this.size += value.length;
-	    }
-	  },
-	
-	  // Get the item with the given key from the cache
-	  // or null if the item is not found
-	  getItem: function (key) {
-	    var value = this.storage[key];
-	    if (_.isUndefined(value)) {
-	      value = null;
-	    }
-	    return value;
-	  },
-	
-	  // Remove the item with the given key
-	  // And update the size of the cache
-	  removeItem: function (key) {
-	    var value = this.getItem(key);
-	    delete this.storage[key];
-	    if (value != null) {
-	      this.size -= value.length;
-	    }
-	    return value;
-	  },
-	
-	  clear: function () {
-	    this.storage = {};
-	    this.size = 0;
-	  }
-	});
-	
-	module.exports = Backend;
-
 
 /***/ },
 /* 12 */
