@@ -44,6 +44,8 @@ describe("Positive write strategies", function () {
         store: this.store,
         policy: this.policy
       });
+      this.serverResponseTextStatus = 'Created';
+      this.serverResponseXHR = { status: 201 };
       this.execution = this.strategy.execute(this.model, this.options);
     });
 
@@ -53,11 +55,20 @@ describe("Positive write strategies", function () {
     });
 
     it("writes to the cache when the response returns", function () {
-      this.ajax.resolve(this.serverResponse);
+      this.ajax.resolve([this.serverResponse]);
       return this.ajaxResponse.then(function () {
         expect(this.store.set).to.have.been.calledOnce
           .and.calledWith(this.key, this.serverResponse, this.metadata);
       }.bind(this));
+    });
+
+    it("resolves execution promise with the arguments passed to the success callback", function () {
+      var expectedResponseArguments = [this.serverResponse, this.serverResponseTextStatus, this.serverResponseXHR];
+      this.ajax.resolve(expectedResponseArguments);
+      this.execution.then(function (responseArgs) {
+        expect(responseArgs).to.eql(expectedResponseArguments);
+      }.bind(this));
+      return this.execution;
     });
   });
 
@@ -67,6 +78,8 @@ describe("Positive write strategies", function () {
         store: this.store,
         policy: this.policy
       });
+      this.serverResponseTextStatus = 'Accepted';
+      this.serverResponseXHR = { status: 202 };
       this.execution = this.strategy.execute(this.model, this.options);
     });
 
@@ -76,11 +89,20 @@ describe("Positive write strategies", function () {
     });
 
     it("writes to the cache when the response returns", function () {
-      this.ajax.resolve(this.serverResponse);
+      this.ajax.resolve([this.serverResponse]);
       return this.ajaxResponse.then(function () {
         expect(this.store.set).to.have.been.calledOnce
           .and.calledWith(this.key, this.serverResponse, this.metadata);
       }.bind(this));
+    });
+
+    it("resolves execution promise with the arguments passed to the success callback", function () {
+      var expectedResponseArguments = [this.serverResponse, this.serverResponseTextStatus, this.serverResponseXHR];
+      this.ajax.resolve(expectedResponseArguments);
+      this.execution.then(function (responseArgs) {
+        expect(responseArgs).to.eql(expectedResponseArguments);
+      }.bind(this));
+      return this.execution;
     });
   });
 
@@ -90,6 +112,8 @@ describe("Positive write strategies", function () {
         store: this.store,
         policy: this.policy
       });
+      this.serverResponseTextStatus = 'Accepted';
+      this.serverResponseXHR = { status: 202 };
       this.execution = this.strategy.execute(this.model, this.options);
     });
 
@@ -99,11 +123,20 @@ describe("Positive write strategies", function () {
     });
 
     it("writes to the cache when the response returns", function () {
-      this.ajax.resolve(this.serverResponse);
+      this.ajax.resolve([this.serverResponse]);
       return this.ajaxResponse.then(function () {
         expect(this.store.set).to.have.been.calledOnce
           .and.calledWith(this.key, this.serverResponse, this.metadata);
       }.bind(this));
+    });
+
+    it("resolves execution promise with the arguments passed to the success callback", function () {
+      var expectedResponseArguments = [this.serverResponse, this.serverResponseTextStatus, this.serverResponseXHR];
+      this.ajax.resolve(expectedResponseArguments);
+      this.execution.then(function (responseArgs) {
+        expect(responseArgs).to.eql(expectedResponseArguments);
+      }.bind(this));
+      return this.execution;
     });
   });
 });

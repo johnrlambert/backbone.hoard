@@ -2,6 +2,7 @@
 
 var Hoard = require('./backbone.hoard');
 var Strategy = require('./strategy');
+var _ = require('underscore');
 
 // The Delete Strategy aggressively clears a cached item
 var Delete = Strategy.extend({
@@ -11,8 +12,12 @@ var Delete = Strategy.extend({
     var key = this.policy.getKey(model, this.method);
     var invalidatePromise = this.invalidate(key, options);
     var syncPromise = Hoard.sync(this.method, model, options);
-    var returnSync = function () { return syncPromise; };
-    return invalidatePromise.then(returnSync);
+    // if the cache is successfully cleared, we then return a promise
+    // that will resolve with an array of all the arguments the orig
+    // sync promise resolves with.
+    return invalidatePromise.then(_.bind(function () {
+      return this._wrapSyncResponsePromise(syncPromise);
+    }, this));
   }
 });
 

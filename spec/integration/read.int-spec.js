@@ -113,6 +113,24 @@ module.exports = function (storageName, storage) {
             expect(this.m1.get('value')).to.equal(2);
             expect(this.m2.get('value')).to.equal(2);
           });
+          
+          it("resolves the non-cached fetch promise with all the original sync promise resolution arguments", function () {
+              return this.m1Promise.then(function (responseArgs) {
+                expect(responseArgs.length).to.equal(3);
+                expect(responseArgs[0]).to.eql(this.m1.toJSON());
+                expect(responseArgs[1]).to.equal('success');
+                expect(responseArgs[2].status).to.equal(200);
+              }.bind(this));
+          });
+          
+          it("resolves the placeholder fetch promise with all the original sync promise resolution arguments", function () {
+              return this.m2Promise.then(function (responseArgs) {
+                expect(responseArgs.length).to.equal(3);
+                expect(responseArgs[0]).to.eql(this.m1.toJSON());
+                expect(responseArgs[1]).to.equal('success');
+                expect(responseArgs[2].status).to.equal(200);
+              }.bind(this));
+          });
 
           it("only calls the server once", function () {
             expect(this.requests['GET:/id-plus-one/1']).to.have.length(1);
@@ -136,6 +154,14 @@ module.exports = function (storageName, storage) {
           it("doesn't call the server", function () {
             expect(this.requests['GET:/id-plus-one/1']).not.to.exist;
           });
+
+          it("resolves the fetch promise with an array of just the cached response", function () {
+            return this.m2Promise.then(function (responseArgs) {
+              expect(responseArgs.length).to.equal(1);
+              expect(responseArgs[0].value).to.equal(2);
+            }.bind(this));
+          });
+
         });
       });
 

@@ -96,8 +96,21 @@ _.extend(Strategy.prototype, Hoard.Events, {
     }
   },
 
-  // Return a funtion that accesses the model's collection, if it exists
-  // Otherwise, return undefined, becasues the collection cannot be accessed
+  // if syncResponse promise is a non standard promise, we standardize it by 
+  // wrapping the resolution arguments in an array and returning a normal promise
+  _wrapSyncResponsePromise: function (syncResponse) {
+    return new Hoard.Promise(function (resolve, reject) {
+      function completeWithArgumentsArr(fn) {
+        return function () {
+          fn(_.toArray(arguments));
+        }
+      }
+      syncResponse.then(completeWithArgumentsArr(resolve), completeWithArgumentsArr(reject));
+    });
+  },
+
+  // Return a function that accesses the model's collection, if it exists
+  // Otherwise, return undefined, because the collection cannot be accessed
   _getUpdateCollection: function (options) {
     var collection = options && options.collection;
     var collectionControl = collection && collection.sync && collection.sync.hoardControl;

@@ -58,7 +58,7 @@ var Read = Strategy.extend({
         if (options.success) {
           options.success(cachedItem);
         }
-        return cachedItem;
+        return [cachedItem];
       }
     }, this));
   },
@@ -80,19 +80,22 @@ var Read = Strategy.extend({
     options.error = this._wrapErrorWithInvalidate(this.method, model, cacheOptions);
 
     var syncResponse = Hoard.sync(this.method, model, options);
-    return deferred.promise.then(function () {
-      return syncResponse;
-    });
+    // if the store action is successful, we then return a promise
+    // that will resolve with an array of all the arguments the orig
+    // sync promise resolves with.
+    return deferred.promise.then(_.bind(function () {
+      return this._wrapSyncResponsePromise(syncResponse);
+    }, this));
   },
 
   // On a placeholder hit, wait for the live request to go through,
   // then resolve or reject with the response from the live request
   _onPlaceholderHit: function (key, options) {
     var deferred = Hoard.defer();
-    var callback = function (promiseHandler, originalHandler, response) {
-      if (originalHandler) { originalHandler(response); }
+    var callback = function (promiseHandler, originalHandler, responseArgs) {
+      if (originalHandler) { originalHandler(responseArgs[0]); }
       this._decreasePlaceholderAccess(key);
-      promiseHandler(response);
+      promiseHandler(responseArgs);
     };
     var onSuccess = _.bind(callback, this, deferred.resolve, options.success);
     var onError = _.bind(callback, this, deferred.reject, options.error);

@@ -4,7 +4,6 @@ var Backbone = require('backbone');
 var Backend = require('./backend');
 
 var Hoard = {
-  VERSION: '0.4.0',
 
   Promise: function () {
     throw new TypeError('An ES6-compliant Promise implementation must be provided');
