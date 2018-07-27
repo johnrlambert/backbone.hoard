@@ -4,7 +4,7 @@
   "homepage": "http://cmaher.github.io/backbone.hoard/",
   "version": "0.5.0",
   "description": "XHR Consolidation and Caching for Backbone",
-  "main": "backbone.hoard.js",
+  "main": "src/backbone.hoard.js",
   "scripts": {
     "test": "gulp test"
   },
